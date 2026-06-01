@@ -17,6 +17,39 @@ import { PortfolioModal } from "@/components/chat/PortfolioModal";
 import { BriefingModal } from "@/components/chat/BriefingModal";
 import { TradePreCheckModal } from "@/components/chat/TradePreCheckModal";
 
+/* ---------- Thinking progress indicator ---------- */
+const THINKING_STAGES = [
+  { after: 0,   msg: "思考中…" },
+  { after: 8,   msg: "正在分析请求…" },
+  { after: 20,  msg: "调用 AI 模型中，请稍候…" },
+  { after: 45,  msg: "模型运算中，通常需要 1~3 分钟…" },
+  { after: 90,  msg: "仍在处理，复杂分析需要一点时间…" },
+  { after: 150, msg: "即将完成，感谢耐心等待…" },
+];
+
+function ThinkingProgress() {
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setElapsed(s => s + 1), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const stage = [...THINKING_STAGES].reverse().find(s => elapsed >= s.after) ?? THINKING_STAGES[0];
+  const mins = Math.floor(elapsed / 60);
+  const secs = elapsed % 60;
+  const timer = elapsed >= 10
+    ? (mins > 0 ? `${mins}m ${secs}s` : `${secs}s`)
+    : null;
+
+  return (
+    <div className="flex-1 min-w-0 flex items-center gap-2 text-xs text-muted-foreground pt-1">
+      <Loader2 className="h-3 w-3 animate-spin text-primary shrink-0" />
+      <span>{stage.msg}</span>
+      {timer && <span className="opacity-50">({timer})</span>}
+    </div>
+  );
+}
+
 /* ---------- Message grouping ---------- */
 type MsgGroup =
   | { kind: "single"; msg: AgentMessage }
@@ -529,10 +562,7 @@ export function Agent() {
           {status === "streaming" && !streamingText && toolCalls.length === 0 && (
             <div className="flex gap-3">
               <AgentAvatar />
-              <div className="flex-1 min-w-0 flex items-center gap-2 text-xs text-muted-foreground pt-1">
-                <Loader2 className="h-3 w-3 animate-spin text-primary shrink-0" />
-                <span>Thinking…</span>
-              </div>
+              <ThinkingProgress />
             </div>
           )}
 

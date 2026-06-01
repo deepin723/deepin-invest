@@ -13,12 +13,16 @@ Usage:
 
 import asyncio
 import json
+import logging
 import os
 import shutil
 import tempfile
 import time
 import uuid
 from typing import Optional
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [cursor_proxy] %(message)s")
+logger = logging.getLogger(__name__)
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request
@@ -90,6 +94,8 @@ async def call_cursor(prompt: str, model: str, api_key: str) -> str:
         )
 
     workspace = tempfile.mkdtemp(prefix="cursor-proxy-")
+    t0 = time.monotonic()
+    logger.info("cursor agent START  model=%s workspace=%s", model, workspace)
     try:
         env = {**os.environ, "CURSOR_API_KEY": api_key}
         proc = await asyncio.create_subprocess_exec(
@@ -107,11 +113,16 @@ async def call_cursor(prompt: str, model: str, api_key: str) -> str:
             stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=AGENT_TIMEOUT)
         except asyncio.TimeoutError:
             proc.kill()
+            logger.error("cursor agent TIMEOUT after %.0fs", time.monotonic() - t0)
             raise RuntimeError(f"Cursor agent timed out after {AGENT_TIMEOUT}s — increase CURSOR_AGENT_TIMEOUT env var")
 
+        elapsed = time.monotonic() - t0
         if proc.returncode != 0:
+            logger.error("cursor agent ERROR  exit=%d elapsed=%.1fs stderr=%s",
+                         proc.returncode, elapsed, stderr.decode()[:200])
             raise RuntimeError(f"Cursor agent exited {proc.returncode}: {stderr.decode()[:400]}")
 
+        logger.info("cursor agent DONE   elapsed=%.1fs exit=0", elapsed)
         raw = stdout.decode().strip()
         try:
             wrapper = json.loads(raw)
