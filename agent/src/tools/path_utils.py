@@ -77,7 +77,7 @@ def _default_file_roots() -> list[Path]:
     cwd = Path.cwd().resolve()
     home = Path.home().resolve()
     agent_root = _agent_root()
-    return [
+    roots = [
         agent_root / "uploads",
         agent_root / "runs",
         cwd / "uploads",
@@ -85,6 +85,11 @@ def _default_file_roots() -> list[Path]:
         home / ".vibe-trading" / "uploads",
         home / ".vibe-trading" / "imports",
     ]
+    data_dir = os.getenv("DATA_DIR")
+    if data_dir:
+        p = Path(data_dir)
+        roots += [p / "uploads", p / "runs", p / "vibe_trading"]
+    return roots
 
 
 def _default_run_roots() -> list[Path]:
@@ -94,12 +99,17 @@ def _default_run_roots() -> list[Path]:
     cwd = Path.cwd().resolve()
     home = Path.home().resolve()
     agent_root = _agent_root()
-    return [
+    roots = [
         agent_root / "runs",
         swarm_runs_root(),
         cwd / "runs",
         home / ".vibe-trading" / "shadow_runs",
     ]
+    data_dir = os.getenv("DATA_DIR")
+    if data_dir:
+        p = Path(data_dir)
+        roots += [p / "runs", p / "swarm_runs", p / "vibe_trading" / "shadow_runs"]
+    return roots
 
 
 def _allowed_file_roots() -> list[Path]:

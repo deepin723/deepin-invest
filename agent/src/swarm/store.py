@@ -31,6 +31,9 @@ def swarm_runs_root() -> Path:
     run_dir outside the allow-list (P03-A). Deriving it here once keeps
     the store location and the allow-list from drifting again.
     """
+    data_dir = os.getenv("DATA_DIR")
+    if data_dir:
+        return Path(data_dir) / "swarm_runs"
     return Path(__file__).resolve().parents[2] / ".swarm" / "runs"
 
 

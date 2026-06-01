@@ -52,8 +52,9 @@ RUN pip install --no-cache-dir -e .
 RUN useradd --create-home --shell /usr/sbin/nologin vibe \
     && mkdir -p agent/runs agent/sessions agent/uploads agent/.swarm/runs \
     && chown -R vibe:vibe /app \
-    && mkdir -p /data \
-    && chown vibe:vibe /data
+    && mkdir -p /data/runs /data/sessions /data/uploads /data/swarm_runs \
+                /data/vibe_trading/shadow_accounts /data/vibe_trading/shadow_runs /data/vibe_trading/shadow_reports \
+    && chown -R vibe:vibe /data
 USER vibe
 
 # Default port

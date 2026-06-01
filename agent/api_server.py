@@ -36,12 +36,14 @@ for _s in ("stdout", "stderr"):
     if callable(_r):
         _r(encoding="utf-8", errors="replace")
 
-RUNS_DIR = Path(__file__).resolve().parent / "runs"
-SESSIONS_DIR = Path(__file__).resolve().parent / "sessions"
-UPLOADS_DIR = Path(__file__).resolve().parent / "uploads"
 AGENT_DIR = Path(__file__).resolve().parent
-# DATA_DIR lets a Railway/Docker volume persist Settings across redeploys (same pattern as ai-notes).
-ENV_PATH = (Path(os.getenv("DATA_DIR")) / "settings.env") if os.getenv("DATA_DIR") else (AGENT_DIR / ".env")
+_DATA_DIR = Path(os.getenv("DATA_DIR")) if os.getenv("DATA_DIR") else None
+# When DATA_DIR is set (Railway volume), all user-generated data goes there so it
+# survives redeploys. Falls back to the in-container agent/ tree for local dev.
+RUNS_DIR     = (_DATA_DIR / "runs")     if _DATA_DIR else AGENT_DIR / "runs"
+SESSIONS_DIR = (_DATA_DIR / "sessions") if _DATA_DIR else AGENT_DIR / "sessions"
+UPLOADS_DIR  = (_DATA_DIR / "uploads")  if _DATA_DIR else AGENT_DIR / "uploads"
+ENV_PATH     = (_DATA_DIR / "settings.env") if _DATA_DIR else (AGENT_DIR / ".env")
 ENV_EXAMPLE_PATH = AGENT_DIR / ".env.example"
 
 MAX_UPLOAD_SIZE = 50 * 1024 * 1024  # 50 MB
@@ -1570,7 +1572,7 @@ async def get_shadow_report(shadow_id: str, format: str = "html"):
     if format not in ("html", "pdf"):
         raise HTTPException(status_code=400, detail="format must be html or pdf")
 
-    reports_dir = Path.home() / ".vibe-trading" / "shadow_reports"
+    reports_dir = (_DATA_DIR / "vibe_trading" / "shadow_reports") if _DATA_DIR else (Path.home() / ".vibe-trading" / "shadow_reports")
     path = reports_dir / f"{shadow_id}.{format}"
     if not path.exists():
         raise HTTPException(status_code=404, detail=f"Shadow report not found: {shadow_id}.{format}")
