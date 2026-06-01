@@ -359,6 +359,12 @@ async def _spa_html_deep_link_fallback(request: Request, call_next):
 @app.on_event("startup")
 async def _run_startup_preflight() -> None:
     """Run preflight checks on server startup."""
+    # Load persisted LLM settings into os.environ so build_llm() works after
+    # a redeploy. Railway env vars take precedence (setdefault).
+    if ENV_PATH.exists():
+        for key, value in _read_env_values(ENV_PATH).items():
+            os.environ.setdefault(key, value)
+
     from src.preflight import run_preflight
 
     run_preflight(console)
