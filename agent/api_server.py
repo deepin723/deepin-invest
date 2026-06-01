@@ -40,7 +40,8 @@ RUNS_DIR = Path(__file__).resolve().parent / "runs"
 SESSIONS_DIR = Path(__file__).resolve().parent / "sessions"
 UPLOADS_DIR = Path(__file__).resolve().parent / "uploads"
 AGENT_DIR = Path(__file__).resolve().parent
-ENV_PATH = AGENT_DIR / ".env"
+# DATA_DIR lets a Railway/Docker volume persist Settings across redeploys (same pattern as ai-notes).
+ENV_PATH = (Path(os.getenv("DATA_DIR")) / "settings.env") if os.getenv("DATA_DIR") else (AGENT_DIR / ".env")
 ENV_EXAMPLE_PATH = AGENT_DIR / ".env.example"
 
 MAX_UPLOAD_SIZE = 50 * 1024 * 1024  # 50 MB
