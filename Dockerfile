@@ -47,15 +47,21 @@ COPY --from=frontend-build /app/frontend/dist frontend/dist
 # Install CLI entrypoint
 RUN pip install --no-cache-dir -e .
 
-# Runtime should not run as root. Keep writable app data directories owned by
-# the service user so named Docker volumes inherit usable permissions.
+# Create vibe user for ownership reference; runtime uses entrypoint to drop privs
 RUN useradd --create-home --shell /usr/sbin/nologin vibe \
     && mkdir -p agent/runs agent/sessions agent/uploads agent/.swarm/runs \
-    && chown -R vibe:vibe /app \
-    && mkdir -p /data/runs /data/sessions /data/uploads /data/swarm_runs \
-                /data/vibe_trading/shadow_accounts /data/vibe_trading/shadow_runs /data/vibe_trading/shadow_reports \
-    && chown -R vibe:vibe /data
-USER vibe
+    && chown -R vibe:vibe /app
+
+# Entrypoint: runs as root, fixes /data permissions, then exec's app as vibe
+RUN printf '#!/bin/sh\n\
+mkdir -p /data/runs /data/sessions /data/uploads /data/swarm_runs \\\n\
+    /data/vibe_trading/shadow_accounts \\\n\
+    /data/vibe_trading/shadow_runs \\\n\
+    /data/vibe_trading/shadow_reports\n\
+chown -R vibe:vibe /data\n\
+exec su vibe -s /bin/sh -c \\\n\
+    "python /app/cursor_proxy.py & sleep 1 && exec vibe-trading serve --host 0.0.0.0 --port ${PORT:-8899}"\n\
+' > /usr/local/bin/entrypoint.sh && chmod +x /usr/local/bin/entrypoint.sh
 
 # Default port
 EXPOSE 8899
@@ -64,5 +70,5 @@ EXPOSE 8899
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
     CMD python -c "import urllib.request,os; urllib.request.urlopen('http://localhost:'+os.getenv('PORT','8899')+'/health')" || exit 1
 
-# Railway injects $PORT at runtime; fall back to 8899 for local Docker use
-CMD ["sh", "-c", "python /app/cursor_proxy.py & sleep 1 && vibe-trading serve --host 0.0.0.0 --port ${PORT:-8899}"]
+# Entrypoint fixes /data ownership (Railway volumes mount as root) then drops to vibe
+CMD ["/usr/local/bin/entrypoint.sh"]
