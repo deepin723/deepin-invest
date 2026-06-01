@@ -29,6 +29,15 @@
     "login_command": "vibe-trading provider login openai-codex"
   },
   {
+    "name": "cursor",
+    "label": "Cursor (Plan Mode)",
+    "api_key_env": "CURSOR_API_KEY",
+    "base_url_env": "CURSOR_BASE_URL",
+    "default_model": "auto",
+    "default_base_url": "http://localhost:8990/v1",
+    "api_key_required": true
+  },
+  {
     "name": "deepseek",
     "label": "DeepSeek",
     "api_key_env": "DEEPSEEK_API_KEY",

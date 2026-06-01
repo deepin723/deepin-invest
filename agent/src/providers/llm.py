@@ -238,6 +238,7 @@ def _sync_provider_env() -> None:
     _PROVIDER_MAP: dict[str, tuple[str | None, str]] = {
         "openai":     ("OPENAI_API_KEY",     "OPENAI_BASE_URL"),
         "openrouter": ("OPENROUTER_API_KEY",  "OPENROUTER_BASE_URL"),
+        "cursor":     ("CURSOR_API_KEY",      "CURSOR_BASE_URL"),
         "deepseek":   ("DEEPSEEK_API_KEY",    "DEEPSEEK_BASE_URL"),
         "gemini":     ("GEMINI_API_KEY",      "GEMINI_BASE_URL"),
         "groq":       ("GROQ_API_KEY",        "GROQ_BASE_URL"),
