@@ -30,6 +30,7 @@ from pydantic import BaseModel
 PORT           = int(os.getenv("CURSOR_PROXY_PORT", 8990))
 CURSOR_API_KEY = os.getenv("CURSOR_API_KEY", "")
 DEFAULT_MODEL  = os.getenv("CURSOR_MODEL", "gpt-5.5")
+AGENT_TIMEOUT  = int(os.getenv("CURSOR_AGENT_TIMEOUT", 600))  # cursor agent runs for several minutes
 
 AGENT_BIN = (
     shutil.which("agent")
@@ -102,7 +103,11 @@ async def call_cursor(prompt: str, model: str, api_key: str) -> str:
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
-        stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=120)
+        try:
+            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=AGENT_TIMEOUT)
+        except asyncio.TimeoutError:
+            proc.kill()
+            raise RuntimeError(f"Cursor agent timed out after {AGENT_TIMEOUT}s — increase CURSOR_AGENT_TIMEOUT env var")
 
         if proc.returncode != 0:
             raise RuntimeError(f"Cursor agent exited {proc.returncode}: {stderr.decode()[:400]}")
