@@ -167,6 +167,11 @@ class EventBus:
                     result.append(event)
                 elif event.event_id == last_event_id:
                     found = True
+            # last_event_id not in buffer (e.g. it was a heartbeat, which is
+            # yielded inline and never stored). Replay everything so the client
+            # doesn't miss attempt.completed / attempt.failed events.
+            if last_event_id and not found:
+                return list(buffer)
             return result
 
     async def subscribe(
