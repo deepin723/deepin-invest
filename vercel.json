@@ -3,7 +3,9 @@
   "outputDirectory": "frontend/dist",
   "framework": null,
   "rewrites": [
+    { "source": "/sessions",        "destination": "https://deepin-invest-production.up.railway.app/sessions" },
     { "source": "/sessions/:path*", "destination": "https://deepin-invest-production.up.railway.app/sessions/:path*" },
+    { "source": "/swarm",           "destination": "https://deepin-invest-production.up.railway.app/swarm" },
     { "source": "/swarm/:path*",    "destination": "https://deepin-invest-production.up.railway.app/swarm/:path*" },
     { "source": "/settings/llm",    "destination": "https://deepin-invest-production.up.railway.app/settings/llm" },
     { "source": "/settings/data-sources", "destination": "https://deepin-invest-production.up.railway.app/settings/data-sources" },
