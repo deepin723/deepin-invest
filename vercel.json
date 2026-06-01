@@ -3,7 +3,18 @@
   "outputDirectory": "frontend/dist",
   "framework": null,
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/sessions/:path*", "destination": "https://deepin-invest-production.up.railway.app/sessions/:path*" },
+    { "source": "/swarm/:path*",    "destination": "https://deepin-invest-production.up.railway.app/swarm/:path*" },
+    { "source": "/settings/llm",    "destination": "https://deepin-invest-production.up.railway.app/settings/llm" },
+    { "source": "/settings/data-sources", "destination": "https://deepin-invest-production.up.railway.app/settings/data-sources" },
+    { "source": "/upload",          "destination": "https://deepin-invest-production.up.railway.app/upload" },
+    { "source": "/shadow-reports/:path*", "destination": "https://deepin-invest-production.up.railway.app/shadow-reports/:path*" },
+    { "source": "/runs",            "destination": "https://deepin-invest-production.up.railway.app/runs" },
+    { "source": "/runs/:path*",     "destination": "https://deepin-invest-production.up.railway.app/runs/:path*" },
+    { "source": "/correlation",     "destination": "https://deepin-invest-production.up.railway.app/correlation" },
+    { "source": "/alpha/:path*",    "destination": "https://deepin-invest-production.up.railway.app/alpha/:path*" },
+    { "source": "/health",          "destination": "https://deepin-invest-production.up.railway.app/health" },
+    { "source": "/(.*)",            "destination": "/index.html" }
   ],
   "headers": [
     {
